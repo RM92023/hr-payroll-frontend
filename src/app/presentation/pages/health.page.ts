@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { CheckHealthUseCase } from '../../application/health/check-health.usecase';
 
@@ -14,13 +14,13 @@ import { CheckHealthUseCase } from '../../application/health/check-health.usecas
         <button type="button" (click)="check()">Probar</button>
       </div>
 
-      <div *ngIf="status() as s" style="margin-top:10px;">
+      <div *if="status() as s" style="margin-top:10px;">
         <span class="pill" [class.ok]="s === 'ok'" [class.bad]="s !== 'ok'">
           status: {{ s }}
         </span>
       </div>
 
-      <div class="err" *ngIf="error()">{{ error() }}</div>
+      <div class="err" *if="error()">{{ error() }}</div>
     </div>
   `
 })
@@ -28,7 +28,7 @@ export class HealthPage {
   status = signal<string | null>(null);
   error = signal<string | null>(null);
 
-  constructor(private readonly uc: CheckHealthUseCase) {}
+  private readonly uc = inject(CheckHealthUseCase);
 
   check() {
     this.error.set(null);

@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiClient } from '../../core/http/api-client';
 
 @Injectable({ providedIn: 'root' })
 export class CheckHealthUseCase {
-  constructor(private readonly api: ApiClient) {}
+  private readonly api = inject(ApiClient);
   execute() {
     return this.api.get<{ status: string }>('/payroll/health');
   }

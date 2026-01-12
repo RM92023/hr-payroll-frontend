@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { NgFor, NgIf, DatePipe } from '@angular/common';
+import { NgFor, NgIf, DatePipe, DecimalPipe } from '@angular/common';
 
 import type { PayrollRule } from '../../domain/payroll/payroll-rule.model';
 import type { ContractType } from '../../domain/shared/contract-type';
@@ -12,39 +12,39 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
 
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, DatePipe],
+  imports: [ReactiveFormsModule, NgIf, NgFor, DatePipe, DecimalPipe],
   template: `
   <div class="row">
     <div class="col card">
       <h2>Crear regla de nómina</h2>
 
       <form [formGroup]="createForm" (ngSubmit)="create()">
-        <label>Key</label>
-        <input formControlName="key" placeholder="Ej: employee.healthPct">
+        <label for="pr-key">Key</label>
+        <input id="pr-key" formControlName="key" placeholder="Ej: employee.healthPct">
 
-        <label>Label</label>
-        <input formControlName="label" placeholder="Ej: Salud empleado">
+        <label for="pr-label">Label</label>
+        <input id="pr-label" formControlName="label" placeholder="Ej: Salud empleado">
 
-        <label>ContractType (opcional)</label>
-        <select formControlName="contractType">
+        <label for="pr-contractType">ContractType (opcional)</label>
+        <select id="pr-contractType" formControlName="contractType">
           <option value="">-- aplica a todos --</option>
           <option value="EMPLOYEE">EMPLOYEE</option>
           <option value="CONTRACTOR">CONTRACTOR</option>
         </select>
 
-        <label>Unit</label>
-        <input formControlName="unit" placeholder="Ej: pct | cop | flat">
+        <label for="pr-unit">Unit</label>
+        <input id="pr-unit" formControlName="unit" placeholder="Ej: pct | cop | flat">
 
-        <label>Value</label>
-        <input type="number" formControlName="value" placeholder="Ej: 0.04">
+        <label for="pr-value">Value</label>
+        <input id="pr-value" type="number" formControlName="value" placeholder="Ej: 0.04">
 
         <div class="actions">
           <button type="submit" [disabled]="createForm.invalid || busy()">Crear</button>
-          <span class="small" *ngIf="busy()">Procesando...</span>
+          <span class="small" *if="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *ngIf="error()">{{ error() }}</div>
+      <div class="err" *if="error()">{{ error() }}</div>
     </div>
 
     <div class="col card">
@@ -55,8 +55,8 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
 
       <div class="row" style="margin-top:8px;">
         <div class="col" style="flex:1 1 260px;">
-          <label>Filtro ContractType</label>
-          <select [value]="filterContractType() ?? ''" (change)="setFilter($any($event.target).value)">
+          <label for="filter-contractType">Filtro ContractType</label>
+          <select id="filter-contractType" [value]="filterContractType() ?? ''" (change)="setFilter($any($event.target).value)">
             <option value="">-- Todas --</option>
             <option value="EMPLOYEE">EMPLOYEE</option>
             <option value="CONTRACTOR">CONTRACTOR</option>
@@ -67,7 +67,7 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
         </div>
       </div>
 
-      <table *ngIf="rules().length; else empty" style="margin-top:10px;">
+      <table *if="rules().length; else empty" style="margin-top:10px;">
         <thead>
           <tr>
             <th>Key</th>
@@ -81,7 +81,7 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
         </thead>
 
         <tbody>
-          <tr *ngFor="let r of rules()">
+          <tr *for="let r of rules()">
             <td><span class="small">{{ r.key }}</span></td>
             <td>{{ r.label }}</td>
             <td><span class="pill">{{ r.contractType ?? 'ALL' }}</span></td>
@@ -106,29 +106,29 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
     </div>
   </div>
 
-  <div class="card" *ngIf="editing() as r" style="margin-top:14px;">
+  <div class="card" *if="editing() as r" style="margin-top:14px;">
     <h2>Editar regla</h2>
 
     <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
       <div class="row">
         <div class="col">
-          <label>Label</label>
-          <input formControlName="label">
+          <label for="edit-label">Label</label>
+          <input id="edit-label" formControlName="label">
         </div>
         <div class="col">
-          <label>Unit</label>
-          <input formControlName="unit">
+          <label for="edit-unit">Unit</label>
+          <input id="edit-unit" formControlName="unit">
         </div>
         <div class="col">
-          <label>Value</label>
-          <input type="number" formControlName="value">
+          <label for="edit-value">Value</label>
+          <input id="edit-value" type="number" formControlName="value">
         </div>
       </div>
 
       <div class="row">
         <div class="col">
-          <label>ContractType</label>
-          <select formControlName="contractType">
+          <label for="edit-contractType">ContractType</label>
+          <select id="edit-contractType" formControlName="contractType">
             <option value="">-- ALL --</option>
             <option value="EMPLOYEE">EMPLOYEE</option>
             <option value="CONTRACTOR">CONTRACTOR</option>
@@ -150,7 +150,7 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
   </div>
   `
 })
-export class PayrollRulesPage {
+export class PayrollRulesPage implements OnInit {
   rules = signal<PayrollRule[]>([]);
   filterContractType = signal<ContractType | undefined>(undefined);
 
@@ -159,27 +159,31 @@ export class PayrollRulesPage {
   error = signal<string | null>(null);
   busy = signal(false);
 
-  createForm = null as any;
-  editForm = null as any;
+  createForm!: import('@angular/forms').FormGroup;
+  editForm!: import('@angular/forms').FormGroup;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly listUc: ListPayrollRulesUseCase,
-    private readonly createUc: CreatePayrollRuleUseCase,
-    private readonly updateUc: UpdatePayrollRuleUseCase,
-    private readonly deleteUc: DeletePayrollRuleUseCase,
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly listUc = inject(ListPayrollRulesUseCase);
+  private readonly createUc = inject(CreatePayrollRuleUseCase);
+  private readonly updateUc = inject(UpdatePayrollRuleUseCase);
+  private readonly deleteUc = inject(DeletePayrollRuleUseCase);
+
+  constructor() {
+    this.load();
+  }
+  
+  ngOnInit(): void {
     this.createForm = this.fb.nonNullable.group({
       key: ['', [Validators.required]],
       label: ['', [Validators.required]],
-      contractType: [''] as any,
+      contractType: [''] as unknown as (ContractType | null),
       unit: ['', [Validators.required]],
       value: [0, [Validators.required]],
     });
 
     this.editForm = this.fb.nonNullable.group({
       label: ['', [Validators.required]],
-      contractType: [''] as any,
+      contractType: [''] as unknown as (ContractType | null),
       unit: ['', [Validators.required]],
       value: [0, [Validators.required]],
       enabled: [true],
@@ -189,7 +193,8 @@ export class PayrollRulesPage {
   }
 
   setFilter(v: string) {
-    this.filterContractType.set((v || undefined) as any);
+    const next = (v && v.length) ? (v as ContractType) : undefined;
+    this.filterContractType.set(next);
   }
 
   load() {
@@ -209,7 +214,7 @@ export class PayrollRulesPage {
     const dto = {
       key: raw.key,
       label: raw.label,
-      contractType: (raw.contractType || null) as any,
+      contractType: (raw.contractType || null) as (ContractType | null),
       unit: raw.unit,
       value: Number(raw.value),
     };
@@ -252,7 +257,7 @@ export class PayrollRulesPage {
     const raw = this.editForm.getRawValue();
     const dto = {
       label: raw.label,
-      contractType: (raw.contractType || null) as any,
+      contractType: (raw.contractType || null) as (ContractType | null),
       unit: raw.unit,
       value: Number(raw.value),
       enabled: !!raw.enabled,

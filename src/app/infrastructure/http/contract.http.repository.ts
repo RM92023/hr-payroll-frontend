@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from '../../core/http/api-client';
 import type { Contract, CreateContractDto } from '../../domain/contracts/contract.model';
@@ -6,7 +6,7 @@ import type { ContractRepository } from '../../domain/contracts/contract.reposit
 
 @Injectable()
 export class HttpContractRepository implements ContractRepository {
-  constructor(private readonly api: ApiClient) {}
+  private readonly api = inject(ApiClient);
   findAll(): Observable<Contract[]> {
     return this.api.get<Contract[]>('/contracts');
   }

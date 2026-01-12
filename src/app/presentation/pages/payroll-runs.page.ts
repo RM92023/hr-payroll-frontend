@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgFor, NgIf, DatePipe, JsonPipe, DecimalPipe } from '@angular/common';
 
@@ -20,38 +20,38 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
       <h2>Crear corrida de nómina (PayrollRun)</h2>
 
       <form [formGroup]="form" (ngSubmit)="createRun()">
-        <label>Empleado</label>
-        <select formControlName="employeeId">
+        <label for="pr-employeeId">Empleado</label>
+        <select id="pr-employeeId" formControlName="employeeId">
           <option value="">-- Selecciona --</option>
-          <option *ngFor="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
+          <option *for="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
         </select>
 
-        <label>Periodo (YYYY-MM)</label>
-        <input formControlName="period" placeholder="2026-01">
+        <label for="pr-period">Periodo (YYYY-MM)</label>
+        <input id="pr-period" formControlName="period" placeholder="2026-01">
 
-        <label>Contrato (opcional)</label>
-        <select formControlName="contractId">
+        <label for="pr-contractId">Contrato (opcional)</label>
+        <select id="pr-contractId" formControlName="contractId">
           <option value="">-- Auto: contrato activo más reciente --</option>
-          <option *ngFor="let c of contractsForSelectedEmployee()" [value]="c.id">
+          <option *for="let c of contractsForSelectedEmployee()" [value]="c.id">
             {{ c.contractType }} — {{ c.baseSalary | number }} — {{ c.active ? 'activo' : 'inactivo' }}
           </option>
         </select>
 
-        <label>Bonos (opcional)</label>
-        <input type="number" formControlName="bonuses" placeholder="0">
+        <label for="pr-bonuses">Bonos (opcional)</label>
+        <input id="pr-bonuses" type="number" formControlName="bonuses" placeholder="0">
 
-        <label>Otras deducciones (opcional)</label>
-        <input type="number" formControlName="otherDeductions" placeholder="0">
+        <label for="pr-otherDeductions">Otras deducciones (opcional)</label>
+        <input id="pr-otherDeductions" type="number" formControlName="otherDeductions" placeholder="0">
 
         <div class="actions">
           <button type="submit" [disabled]="form.invalid || busy()">Crear corrida</button>
-          <span class="small" *ngIf="busy()">Procesando...</span>
+          <span class="small" *if="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *ngIf="error()">{{ error() }}</div>
+      <div class="err" *if="error()">{{ error() }}</div>
 
-      <div *ngIf="lastCreated() as r" style="margin-top:14px;">
+      <div *if="lastCreated() as r" style="margin-top:14px;">
         <div class="small">Última corrida creada:</div>
         <div class="row" style="margin-top:10px;">
           <div class="col card" style="padding:12px;">
@@ -73,22 +73,22 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
 
       <div class="row" style="margin-top:8px;">
         <div class="col" style="flex:1 1 260px;">
-          <label>Filtro empleado</label>
-          <select [value]="filters().employeeId ?? ''" (change)="setEmployeeFilter($any($event.target).value)">
+          <label for="filter-employee">Filtro empleado</label>
+          <select id="filter-employee" [value]="filters().employeeId ?? ''" (change)="setEmployeeFilter($any($event.target).value)">
             <option value="">-- Todos --</option>
-            <option *ngFor="let e of employees()" [value]="e.id">{{ e.name }}</option>
+            <option *for="let e of employees()" [value]="e.id">{{ e.name }}</option>
           </select>
         </div>
         <div class="col" style="flex:1 1 220px;">
-          <label>Filtro periodo</label>
-          <input [value]="filters().period ?? ''" (input)="setPeriodFilter($any($event.target).value)" placeholder="2026-01">
+          <label for="filter-period">Filtro periodo</label>
+          <input id="filter-period" [value]="filters().period ?? ''" (input)="setPeriodFilter($any($event.target).value)" placeholder="2026-01">
         </div>
         <div class="col" style="flex:0 0 160px; align-self:end;">
           <button type="button" (click)="loadRuns()">Aplicar</button>
         </div>
       </div>
 
-      <table *ngIf="runs().length; else empty" style="margin-top:10px;">
+      <table *if="runs().length; else empty" style="margin-top:10px;">
         <thead>
           <tr>
             <th>Empleado</th>
@@ -100,7 +100,7 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let r of runs()">
+          <tr *for="let r of runs()">
             <td>
               <div>{{ r.employee?.name ?? r.employeeId }}</div>
               <div class="small">{{ r.employee?.email ?? '' }}</div>
@@ -124,7 +124,7 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
   </div>
   `
 })
-export class PayrollRunsPage {
+export class PayrollRunsPage implements OnInit {
   employees = signal<Employee[]>([]);
   contracts = signal<Contract[]>([]);
   runs = signal<PayrollRun[]>([]);
@@ -135,15 +135,15 @@ export class PayrollRunsPage {
 
   filters = signal<{ employeeId?: string; period?: string }>({});
 
-  form = null as any;
+  form!: import('@angular/forms').FormGroup;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly listEmployees: ListEmployeesUseCase,
-    private readonly listContracts: ListContractsUseCase,
-    private readonly createRunUc: CreatePayrollRunUseCase,
-    private readonly listRunsUc: ListPayrollRunsUseCase,
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly listEmployees = inject(ListEmployeesUseCase);
+  private readonly listContracts = inject(ListContractsUseCase);
+  private readonly createRunUc = inject(CreatePayrollRunUseCase);
+  private readonly listRunsUc = inject(ListPayrollRunsUseCase);
+
+  ngOnInit(): void {
     this.form = this.fb.nonNullable.group({
       employeeId: ['', [Validators.required]],
       period: ['', [Validators.required, Validators.pattern(/^\d{4}-(0[1-9]|1[0-2])$/)]],
@@ -171,7 +171,7 @@ export class PayrollRunsPage {
   }
 
   contractsForSelectedEmployee() {
-    const employeeId = this.form.controls.employeeId.value;
+    const employeeId = this.form.get('employeeId')?.value;
     if (!employeeId) return [];
     return this.contracts().filter(c => c.employeeId === employeeId);
   }

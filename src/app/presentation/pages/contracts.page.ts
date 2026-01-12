@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgFor, NgIf, DatePipe, DecimalPipe } from '@angular/common';
 
@@ -19,20 +19,20 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
       <h2>Crear contrato</h2>
 
       <form [formGroup]="form" (ngSubmit)="create()">
-        <label>Empleado</label>
-        <select formControlName="employeeId">
+        <label for="employeeId">Empleado</label>
+        <select id="employeeId" formControlName="employeeId">
           <option value="">-- Selecciona --</option>
-          <option *ngFor="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
+          <option *for="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
         </select>
 
-        <label>Tipo de contrato</label>
-        <select formControlName="contractType">
+        <label for="contractType">Tipo de contrato</label>
+        <select id="contractType" formControlName="contractType">
           <option value="EMPLOYEE">EMPLOYEE</option>
           <option value="CONTRACTOR">CONTRACTOR</option>
         </select>
 
-        <label>Salario base</label>
-        <input type="number" formControlName="baseSalary" placeholder="Ej: 3000000">
+        <label for="baseSalary">Salario base</label>
+        <input id="baseSalary" type="number" formControlName="baseSalary" placeholder="Ej: 3000000">
 
         <label style="display:flex; align-items:center; gap:10px; margin-top:12px;">
           <input type="checkbox" formControlName="active" style="width:auto">
@@ -41,11 +41,11 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
 
         <div class="actions">
           <button type="submit" [disabled]="form.invalid || busy()">Crear</button>
-          <span class="small" *ngIf="busy()">Procesando...</span>
+          <span class="small" *if="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *ngIf="error()">{{ error() }}</div>
+      <div class="err" *if="error()">{{ error() }}</div>
     </div>
 
     <div class="col card">
@@ -54,7 +54,7 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
         <button type="button" (click)="load()">Refrescar</button>
       </div>
 
-      <table *ngIf="contracts().length; else empty">
+      <table *if="contracts().length; else empty">
         <thead>
           <tr>
             <th>Empleado</th>
@@ -66,7 +66,7 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of contracts()">
+          <tr *for="let c of contracts()">
             <td>
               <span class="small">{{ employeeName(c.employeeId) }}</span>
             </td>
@@ -90,23 +90,23 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
   </div>
   `
 })
-export class ContractsPage {
+export class ContractsPage implements OnInit {
   employees = signal<Employee[]>([]);
   contracts = signal<Contract[]>([]);
   error = signal<string | null>(null);
   busy = signal(false);
 
-  form = null as any;
+  form!: import('@angular/forms').FormGroup;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly listEmployees: ListEmployeesUseCase,
-    private readonly listContracts: ListContractsUseCase,
-    private readonly createContract: CreateContractUseCase,
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly listEmployees = inject(ListEmployeesUseCase);
+  private readonly listContracts = inject(ListContractsUseCase);
+  private readonly createContract = inject(CreateContractUseCase);
+
+  ngOnInit(): void {
     this.form = this.fb.nonNullable.group({
       employeeId: ['', [Validators.required]],
-      contractType: ['EMPLOYEE' as any, [Validators.required]],
+      contractType: ['EMPLOYEE' as unknown as ContractType, [Validators.required]],
       baseSalary: [0, [Validators.required, Validators.min(0)]],
       active: [true],
     });

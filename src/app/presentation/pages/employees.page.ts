@@ -1,6 +1,6 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { AsyncPipe, DatePipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgFor, NgIf, DecimalPipe } from '@angular/common';
 
 import type { Employee } from '../../domain/employees/employee.model';
 import { ListEmployeesUseCase } from '../../application/employees/list-employees.usecase';
@@ -8,24 +8,24 @@ import { CreateEmployeeUseCase } from '../../application/employees/create-employ
 
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, AsyncPipe, DatePipe],
+  imports: [ReactiveFormsModule, NgIf, NgFor, AsyncPipe, DatePipe, DecimalPipe],
   template: `
   <div class="row">
     <div class="col card">
       <h2>Crear empleado</h2>
       <form [formGroup]="form" (ngSubmit)="create()">
-        <label>Nombre</label>
-        <input formControlName="name" placeholder="Ej: Ana Pérez">
-        <label>Email</label>
-        <input formControlName="email" placeholder="ana@empresa.com">
+        <label for="name">Nombre</label>
+        <input id="name" formControlName="name" placeholder="Ej: Ana Pérez">
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" placeholder="ana@empresa.com">
 
         <div class="actions">
           <button type="submit" [disabled]="form.invalid || busy()">Crear</button>
-          <span class="small" *ngIf="busy()">Procesando...</span>
+          <span class="small" *if="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *ngIf="error()">{{ error() }}</div>
+      <div class="err" *if="error()">{{ error() }}</div>
     </div>
 
     <div class="col card">
@@ -34,7 +34,7 @@ import { CreateEmployeeUseCase } from '../../application/employees/create-employ
         <button type="button" (click)="load()">Refrescar</button>
       </div>
 
-      <table *ngIf="employees().length; else empty">
+      <table *if="employees().length; else empty">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -44,7 +44,7 @@ import { CreateEmployeeUseCase } from '../../application/employees/create-employ
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let e of employees()">
+          <tr *for="let e of employees()">
             <td>{{ e.name }}</td>
             <td>{{ e.email }}</td>
             <td><span class="small">{{ e.id }}</span></td>
@@ -60,18 +60,18 @@ import { CreateEmployeeUseCase } from '../../application/employees/create-employ
   </div>
   `
 })
-export class EmployeesPage {
+export class EmployeesPage implements OnInit {
   employees = signal<Employee[]>([]);
   error = signal<string | null>(null);
   busy = signal(false);
 
-  form = null as any;
+  form!: import('@angular/forms').FormGroup;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly listUc: ListEmployeesUseCase,
-    private readonly createUc: CreateEmployeeUseCase,
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly listUc = inject(ListEmployeesUseCase);
+  private readonly createUc = inject(CreateEmployeeUseCase);
+
+  ngOnInit(): void {
     this.form = this.fb.nonNullable.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],

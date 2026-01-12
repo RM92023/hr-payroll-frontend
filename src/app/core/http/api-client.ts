@@ -1,16 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-base-url.token';
 
-type Params = Record<string, any>;
+type Params = unknown | undefined;
 
 @Injectable({ providedIn: 'root' })
 export class ApiClient {
-  constructor(
-    private readonly http: HttpClient,
-    @Inject(API_BASE_URL) private readonly baseUrl: string,
-  ) {}
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = inject(API_BASE_URL);
 
   get<T>(path: string, params?: Params): Observable<T> {
     const httpParams = this.toParams(params);
@@ -35,10 +33,11 @@ export class ApiClient {
     return `${cleanBase}${cleanPath}`;
   }
 
-  private toParams(params?: Record<string, any>): HttpParams {
+  private toParams(params?: Params): HttpParams {
     let p = new HttpParams();
-    if (!params) return p;
-    for (const [k, v] of Object.entries(params)) {
+    if (!params || typeof params !== 'object') return p;
+    const obj = params as Record<string, unknown>;
+    for (const [k, v] of Object.entries(obj)) {
       if (v === undefined || v === null || v === '') continue;
       p = p.set(k, String(v));
     }
