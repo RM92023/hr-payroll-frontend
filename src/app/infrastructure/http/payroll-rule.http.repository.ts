@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from '../../core/http/api-client';
 import type { CreatePayrollRuleDto, FindPayrollRulesQuery, PayrollRule, UpdatePayrollRuleDto } from '../../domain/payroll/payroll-rule.model';
@@ -6,7 +6,7 @@ import type { PayrollRuleRepository } from '../../domain/payroll/payroll-rule.re
 
 @Injectable()
 export class HttpPayrollRuleRepository implements PayrollRuleRepository {
-  constructor(private readonly api: ApiClient) {}
+  private readonly api = inject(ApiClient);
 
   findAll(query?: FindPayrollRulesQuery): Observable<PayrollRule[]> {
     return this.api.get<PayrollRule[]>('/payroll/rules', query);
