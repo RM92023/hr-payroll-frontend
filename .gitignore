@@ -1,0 +1,91 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+jspm_packages/
+
+# =========================
+# Angular build outputs
+# =========================
+dist/
+out-tsc/
+tmp/
+temp/
+
+# Angular CLI cache (Angular 13+)
+.angular/
+.angular/cache/
+
+# =========================
+# Testing / Coverage
+# =========================
+coverage/
+.nyc_output/
+cypress/videos/
+cypress/screenshots/
+
+# =========================
+# Logs
+# =========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+*.local
+*.secret
+*.secrets
+*.pem
+*.key
+
+# =========================
+# Editor / IDE
+# =========================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# TypeScript build info
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Misc
+# =========================
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.cache
+
+# =========================
+# Optional: lockfiles (elige el que uses)
+# =========================
+# If you use npm, keep package-lock.json committed (recommended)
+# If you use yarn/pnpm, commit their lockfile and ignore the others
+# yarn.lock
+# pnpm-lock.yaml
