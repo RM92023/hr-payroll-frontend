@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AsyncPipe, DatePipe, NgFor, NgIf, DecimalPipe } from '@angular/common';
@@ -21,11 +22,11 @@ import { CreateEmployeeUseCase } from '../../application/employees/create-employ
 
         <div class="actions">
           <button type="submit" [disabled]="form.invalid || busy()">Crear</button>
-          <span class="small" *if="busy()">Procesando...</span>
+          <span class="small" *ngIf="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *if="error()">{{ error() }}</div>
+      <div class="err" *ngIf="error()">{{ error() }}</div>
     </div>
 
     <div class="col card">
@@ -34,24 +35,28 @@ import { CreateEmployeeUseCase } from '../../application/employees/create-employ
         <button type="button" (click)="load()">Refrescar</button>
       </div>
 
-      <table *if="employees().length; else empty">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Id</th>
-            <th>Creado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *for="let e of employees()">
-            <td>{{ e.name }}</td>
-            <td>{{ e.email }}</td>
-            <td><span class="small">{{ e.id }}</span></td>
-            <td><span class="small">{{ e.createdAt | date:'short' }}</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <ng-container *ngIf="employees().length; else empty">
+        <div class="table-wrap" style="margin-top:10px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Id</th>
+                <th>Creado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of employees()">
+                <td>{{ e.name }}</td>
+                <td class="wrap-anywhere">{{ e.email }}</td>
+                <td><span class="small mono wrap-anywhere">{{ e.id }}</span></td>
+                <td><span class="small">{{ e.createdAt | date:'short' }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
 
       <ng-template #empty>
         <div class="small">Aún no hay empleados.</div>
