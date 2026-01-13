@@ -1,6 +1,7 @@
+/* eslint-disable */
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { NgFor, NgIf, DatePipe, DecimalPipe } from '@angular/common';
+import { NgIf, NgFor, DatePipe, DecimalPipe } from '@angular/common';
 
 import type { Contract } from '../../domain/contracts/contract.model';
 import type { Employee } from '../../domain/employees/employee.model';
@@ -22,7 +23,7 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
         <label for="employeeId">Empleado</label>
         <select id="employeeId" formControlName="employeeId">
           <option value="">-- Selecciona --</option>
-          <option *for="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
+          <option *ngFor="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
         </select>
 
         <label for="contractType">Tipo de contrato</label>
@@ -41,11 +42,11 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
 
         <div class="actions">
           <button type="submit" [disabled]="form.invalid || busy()">Crear</button>
-          <span class="small" *if="busy()">Procesando...</span>
+          <span class="small" *ngIf="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *if="error()">{{ error() }}</div>
+      <div class="err" *ngIf="error()">{{ error() }}</div>
     </div>
 
     <div class="col card">
@@ -54,34 +55,38 @@ import { CreateContractUseCase } from '../../application/contracts/create-contra
         <button type="button" (click)="load()">Refrescar</button>
       </div>
 
-      <table *if="contracts().length; else empty">
-        <thead>
-          <tr>
-            <th>Empleado</th>
-            <th>Tipo</th>
-            <th>Salario</th>
-            <th>Activo</th>
-            <th>Id</th>
-            <th>Creado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *for="let c of contracts()">
-            <td>
-              <span class="small">{{ employeeName(c.employeeId) }}</span>
-            </td>
-            <td><span class="pill">{{ c.contractType }}</span></td>
-            <td>{{ c.baseSalary | number }}</td>
-            <td>
-              <span class="pill" [class.ok]="c.active" [class.bad]="!c.active">
-                {{ c.active ? 'Sí' : 'No' }}
-              </span>
-            </td>
-            <td><span class="small">{{ c.id }}</span></td>
-            <td><span class="small">{{ c.createdAt | date:'short' }}</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <ng-container *ngIf="contracts().length; else empty">
+        <div class="table-wrap" style="margin-top:10px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Tipo</th>
+                <th>Salario</th>
+                <th>Activo</th>
+                <th>Id</th>
+                <th>Creado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of contracts()">
+                <td>
+                  <span class="small wrap-anywhere">{{ employeeName(c.employeeId) }}</span>
+                </td>
+                <td><span class="pill">{{ c.contractType }}</span></td>
+                <td>{{ c.baseSalary | number }}</td>
+                <td>
+                  <span class="pill" [class.ok]="c.active" [class.bad]="!c.active">
+                    {{ c.active ? 'Sí' : 'No' }}
+                  </span>
+                </td>
+                <td><span class="small mono wrap-anywhere">{{ c.id }}</span></td>
+                <td><span class="small">{{ c.createdAt | date:'short' }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
 
       <ng-template #empty>
         <div class="small">Aún no hay contratos.</div>

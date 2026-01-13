@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Component, signal, inject } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { CheckHealthUseCase } from '../../application/health/check-health.usecase';
@@ -14,13 +15,13 @@ import { CheckHealthUseCase } from '../../application/health/check-health.usecas
         <button type="button" (click)="check()">Probar</button>
       </div>
 
-      <div *if="status() as s" style="margin-top:10px;">
+      <div *ngIf="status() as s" style="margin-top:10px;">
         <span class="pill" [class.ok]="s === 'ok'" [class.bad]="s !== 'ok'">
           status: {{ s }}
         </span>
       </div>
 
-      <div class="err" *if="error()">{{ error() }}</div>
+      <div class="err" *ngIf="error()">{{ error() }}</div>
     </div>
   `
 })

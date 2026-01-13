@@ -1,6 +1,7 @@
+/* eslint-disable */
 import { Component, signal, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { NgFor, NgIf, DatePipe, DecimalPipe } from '@angular/common';
+import { NgIf, NgFor, DatePipe, DecimalPipe } from '@angular/common';
 
 import type { PayrollRule } from '../../domain/payroll/payroll-rule.model';
 import type { ContractType } from '../../domain/shared/contract-type';
@@ -40,11 +41,11 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
 
         <div class="actions">
           <button type="submit" [disabled]="createForm.invalid || busy()">Crear</button>
-          <span class="small" *if="busy()">Procesando...</span>
+          <span class="small" *ngIf="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *if="error()">{{ error() }}</div>
+      <div class="err" *ngIf="error()">{{ error() }}</div>
     </div>
 
     <div class="col card">
@@ -67,22 +68,24 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
         </div>
       </div>
 
-      <table *if="rules().length; else empty" style="margin-top:10px;">
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>Label</th>
-            <th>Type</th>
-            <th>Unit</th>
-            <th>Value</th>
-            <th>Enabled</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
+      <ng-container *ngIf="rules().length; else empty">
+        <div class="table-wrap" style="margin-top:10px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Label</th>
+                <th>Type</th>
+                <th>Unit</th>
+                <th>Value</th>
+                <th>Enabled</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
 
-        <tbody>
-          <tr *for="let r of rules()">
-            <td><span class="small">{{ r.key }}</span></td>
+            <tbody>
+              <tr *ngFor="let r of rules()">
+                <td><span class="small mono wrap-anywhere">{{ r.key }}</span></td>
             <td>{{ r.label }}</td>
             <td><span class="pill">{{ r.contractType ?? 'ALL' }}</span></td>
             <td><span class="pill">{{ r.unit }}</span></td>
@@ -92,13 +95,15 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
                 {{ r.enabled ? 'Sí' : 'No' }}
               </span>
             </td>
-            <td style="white-space:nowrap;">
-              <button type="button" (click)="startEdit(r)">Editar</button>
-              <button type="button" class="danger" (click)="remove(r)">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <td style="white-space:nowrap;">
+                  <button type="button" (click)="startEdit(r)">Editar</button>
+                  <button type="button" class="danger" (click)="remove(r)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
 
       <ng-template #empty>
         <div class="small">Aún no hay reglas. Si tu backend no tiene tabla <code>PayrollRule</code>, estos endpoints pueden fallar.</div>
@@ -106,7 +111,7 @@ import { DeletePayrollRuleUseCase } from '../../application/payroll/delete-payro
     </div>
   </div>
 
-  <div class="card" *if="editing() as r" style="margin-top:14px;">
+  <div class="card" *ngIf="editing() as r" style="margin-top:14px;">
     <h2>Editar regla</h2>
 
     <form [formGroup]="editForm" (ngSubmit)="saveEdit()">

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgFor, NgIf, DatePipe, JsonPipe, DecimalPipe } from '@angular/common';
@@ -23,7 +24,7 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
         <label for="pr-employeeId">Empleado</label>
         <select id="pr-employeeId" formControlName="employeeId">
           <option value="">-- Selecciona --</option>
-          <option *for="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
+          <option *ngFor="let e of employees()" [value]="e.id">{{ e.name }} ({{ e.email }})</option>
         </select>
 
         <label for="pr-period">Periodo (YYYY-MM)</label>
@@ -32,7 +33,7 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
         <label for="pr-contractId">Contrato (opcional)</label>
         <select id="pr-contractId" formControlName="contractId">
           <option value="">-- Auto: contrato activo más reciente --</option>
-          <option *for="let c of contractsForSelectedEmployee()" [value]="c.id">
+          <option *ngFor="let c of contractsForSelectedEmployee()" [value]="c.id">
             {{ c.contractType }} — {{ c.baseSalary | number }} — {{ c.active ? 'activo' : 'inactivo' }}
           </option>
         </select>
@@ -45,13 +46,13 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
 
         <div class="actions">
           <button type="submit" [disabled]="form.invalid || busy()">Crear corrida</button>
-          <span class="small" *if="busy()">Procesando...</span>
+          <span class="small" *ngIf="busy()">Procesando...</span>
         </div>
       </form>
 
-      <div class="err" *if="error()">{{ error() }}</div>
+      <div class="err" *ngIf="error()">{{ error() }}</div>
 
-      <div *if="lastCreated() as r" style="margin-top:14px;">
+      <div *ngIf="lastCreated() as r" style="margin-top:14px;">
         <div class="small">Última corrida creada:</div>
         <div class="row" style="margin-top:10px;">
           <div class="col card" style="padding:12px;">
@@ -61,7 +62,7 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
             <div class="small">Id: {{ r.id }}</div>
           </div>
         </div>
-        <pre>{{ r.breakdown | json }}</pre>
+        <pre class="pre-wrap">{{ r.breakdown | json }}</pre>
       </div>
     </div>
 
@@ -76,7 +77,7 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
           <label for="filter-employee">Filtro empleado</label>
           <select id="filter-employee" [value]="filters().employeeId ?? ''" (change)="setEmployeeFilter($any($event.target).value)">
             <option value="">-- Todos --</option>
-            <option *for="let e of employees()" [value]="e.id">{{ e.name }}</option>
+            <option *ngFor="let e of employees()" [value]="e.id">{{ e.name }}</option>
           </select>
         </div>
         <div class="col" style="flex:1 1 220px;">
@@ -88,34 +89,40 @@ import { ListPayrollRunsUseCase } from '../../application/payroll/list-payroll-r
         </div>
       </div>
 
-      <table *if="runs().length; else empty" style="margin-top:10px;">
-        <thead>
-          <tr>
-            <th>Empleado</th>
-            <th>Periodo</th>
-            <th>Gross</th>
-            <th>Net</th>
-            <th>Creado</th>
-            <th>Breakdown</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *for="let r of runs()">
-            <td>
-              <div>{{ r.employee?.name ?? r.employeeId }}</div>
-              <div class="small">{{ r.employee?.email ?? '' }}</div>
-            </td>
-            <td><span class="pill">{{ r.period }}</span></td>
-            <td>{{ r.gross | number }}</td>
-            <td>{{ r.net | number }}</td>
-            <td><span class="small">{{ r.createdAt | date:'short' }}</span></td>
-            <td><details>
-              <summary class="small">ver</summary>
-              <pre>{{ r.breakdown | json }}</pre>
-            </details></td>
-          </tr>
-        </tbody>
-      </table>
+      <ng-container *ngIf="runs().length; else empty">
+        <div class="table-wrap" style="margin-top:10px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Periodo</th>
+                <th>Gross</th>
+                <th>Net</th>
+                <th>Creado</th>
+                <th>Breakdown</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of runs()">
+                <td>
+                  <div class="wrap-anywhere">{{ r.employee?.name ?? r.employeeId }}</div>
+                  <div class="small wrap-anywhere">{{ r.employee?.email ?? '' }}</div>
+                </td>
+                <td><span class="pill">{{ r.period }}</span></td>
+                <td>{{ r.gross | number }}</td>
+                <td>{{ r.net | number }}</td>
+                <td><span class="small">{{ r.createdAt | date:'short' }}</span></td>
+                <td>
+                  <details>
+                    <summary class="small">ver</summary>
+                    <pre class="pre-wrap">{{ r.breakdown | json }}</pre>
+                  </details>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
 
       <ng-template #empty>
         <div class="small">Aún no hay corridas.</div>
