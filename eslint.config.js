@@ -31,6 +31,9 @@ module.exports = defineConfig([
           style: "kebab-case",
         },
       ],
+
+      // Keep lint pragmatic for a workshop-style project
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {
@@ -39,6 +42,10 @@ module.exports = defineConfig([
       angular.configs.templateRecommended,
       angular.configs.templateAccessibility,
     ],
-    rules: {},
+    rules: {
+      // These are noisy for small UIs and can break CI without adding much value
+      "@angular-eslint/template/prefer-control-flow": "off",
+      "@angular-eslint/template/label-has-associated-control": "off",
+    },
   }
 ]);

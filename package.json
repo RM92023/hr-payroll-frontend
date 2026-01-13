@@ -6,7 +6,9 @@
     "start": "ng serve --port 4200",
     "build": "ng build",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "eslint \"src/**/*.{ts,html}\"",
+    "lint:fix": "npm run lint -- --fix",
+    "test:ci": "cross-env CI=true ng test --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage --no-progress"
   },
   "dependencies": {
     "@angular/animations": "^17.3.0",
@@ -28,6 +30,7 @@
     "@types/jasmine": "^5.1.4",
     "angular-eslint": "21.0.1",
     "eslint": "^9.39.1",
+    "cross-env": "^7.0.3",
     "jasmine-core": "^5.1.2",
     "karma": "^6.4.3",
     "karma-chrome-launcher": "^3.2.0",
