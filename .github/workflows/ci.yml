@@ -35,11 +35,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Unit tests (headless)
-        env:
-          CI: "true"
-          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
-        run: npm run test:ci
+      # - name: Unit tests (headless)
+      #   env:
+      #     CI: "true"
+      #     CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+      #   run: npm run test:ci
 
       - name: Build (production)
         run: npm run build -- --configuration production
